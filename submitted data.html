@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard and Form</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+  <style>
+    .main {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .main>div:first-child {
+      width: 15%;
+    }
+
+    .main>div:last-child {
+      width: 75%;
+    }
+
+    .sidebar {
+
+      height: 100%;
+      background-color: #343a40;
+      color: #ffffff;
+      position: absolute;
+      width: 15%;
+    }
+
+    .sidebar a {
+      color: #ffffff;
+      text-decoration: none;
+      padding: 10px 15px;
+      display: block;
+    }
+
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+
+    .content {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  
+
+    <!-- Submitted Data View -->
+    <div id="submittedContainer" class="card p-4 shadow hidden">
+      <h3 class="mb-4">Important Form</h3>
+      <p>Submitted successfully with the following data:</p>
+      <div class="mb-3">
+        <strong>First Name:</strong> <span id="submittedFirstName"></span>
+      </div>
+      <div class="mb-3">
+        <strong>Last Name:</strong> <span id="submittedLastName"></span>
+      </div>
+      <div class="mb-3">
+        <strong>Email:</strong> <span id="submittedEmail"></span>
+      </div>
+      <div class="mb-3">
+        <strong>City:</strong> <span id="submittedCity"></span>
+      </div>
+      <div class="mb-3">
+        <strong>State:</strong> <span id="submittedState"></span>
+      </div>
+      <div class="mb-3">
+        <strong>Country:</strong> <span id="submittedCountry"></span>
+      </div>
+      <div class="mt-3">
+        <button class="btn btn-warning" onclick="editForm()">Edit</button>
+        <button class="btn btn-danger" onclick="closeApp()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom Script -->
+  <script>
+   function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.add('d-none'));
+      document.getElementById(pageId).classList.remove('d-none');
+  // Get form values
+  const firstName = document.getElementById('firstName').value;
+  const lastName = document.getElementById('lastName').value;
+  const email = document.getElementById('email').value;
+  const city = document.getElementById('city').value;
+  const state = document.getElementById('state').value;
+  const country = document.getElementById('country').value;
+
+  // Validate form fields
+  if (!firstName || !lastName || !email || !city || !state || !country) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  // Prepare data object
+  const formData = {
+    firstName,
+    lastName,
+    email,
+    city,
+    state,
+    country
+  };
+
+  // Send data to REST API
+  fetch('https://topengr.com/api/v1/assessment/formdata, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+    .then(response => response.json()) // Parse JSON response
+    .then(data => {
+      if (data.type === 1) {
+        // Info type response
+        alert(`Info: ${data.message} (Code: ${data.code})`);
+        // Populate submitted data view
+        document.getElementById('submittedFirstName').textContent = formData.firstName;
+        document.getElementById('submittedLastName').textContent = formData.lastName;
+        document.getElementById('submittedEmail').textContent = formData.email;
+        document.getElementById('submittedCity').textContent = formData.city;
+        document.getElementById('submittedState').textContent = formData.state;
+        document.getElementById('submittedCountry').textContent = formData.country;
+        // Switch views
+        document.getElementById('formContainer').classList.add('hidden');
+        document.getElementById('submittedContainer').classList.remove('hidden');
+      } else if (data.type === 2) {
+        // Warning type response
+        alert(`Warning: ${data.message} (Code: ${data.code})`);
+      } else if (data.type === 3) {
+        // Error type response
+        alert(`Error: ${data.message} (Code: ${data.code})`);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while submitting the form.');
+    });
+}
+
+  </script>
+</body>
+</html>
